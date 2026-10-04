@@ -1,0 +1,5 @@
+# Runtime dependencies bundled into the portable acquisition package.
+cryptography>=42.0.0
+bleak>=0.22.0
+numpy>=1.26.0
+sounddevice>=0.4.7

@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+.sandbox-test/
+build/
+dist/
+*.spec
+digital_alibi.sqlite
+digital_alibi_ed25519_private.pem
+digital_alibi_ed25519_public.pem
+tsr/
+.pytest_cache/

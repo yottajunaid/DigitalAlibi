@@ -32,7 +32,35 @@ The program rejects resolved output paths outside the current directory and does
 
 **Boundary of that guarantee:** Digital Alibi cannot prevent the operating system, a Wi-Fi stack, Bluetooth daemon, audio driver, endpoint-security product, shell history, or a third-party library from maintaining its own state. Use a validated clean acquisition environment, review OS policy, and test on your intended target hardware before relying on any “zero footprint” claim.
 
-## 2. What it collects
+## 2. Architecture and Workflow
+
+```mermaid
+graph TD
+    %% Define styles
+    classDef startEnd fill:#1f2937,stroke:#374151,stroke-width:2px,color:#fff;
+    classDef action fill:#2563eb,stroke:#1d4ed8,stroke-width:2px,color:#fff;
+    classDef decision fill:#059669,stroke:#047857,stroke-width:2px,color:#fff;
+    classDef database fill:#b91c1c,stroke:#991b1b,stroke-width:2px,color:#fff;
+
+    A([Start: Plug USB into Target PC]):::startEnd --> B[Run: capture]:::action
+    B --> C{Detect Radios}:::decision
+    
+    C -->|Wi-Fi/BLE found| D[Extract MAC Addresses]:::action
+    C -->|No radios found| E[Capture Audio Digest]:::action
+    
+    D --> F{Internet Available?}:::decision
+    E --> F
+    
+    F -->|Yes| G[Fetch RFC 3161 TSA Token]:::action
+    F -->|No| H[Seal via Local Ed25519 Key]:::action
+    
+    G --> I[(Save to digital_alibi.sqlite)]:::database
+    H --> I
+    
+    I --> J([End: Unplug USB]):::startEnd
+```
+
+## 3. What it collects
 
 | Source | Method | Stored evidence |
 |---|---|---|
@@ -42,7 +70,31 @@ The program rejects resolved output paths outside the current directory and does
 
 No custom radio drivers, monitor mode, packet capture, SSIDs, BLE names, audio files, cloud uploads, or user-profile logs are intentionally used.
 
-## 3. Evidence format and cryptographic design
+## 4. Evidence format and cryptographic design
+
+```mermaid
+sequenceDiagram
+    participant PC as Target PC Environment
+    participant DA as Digital Alibi (USB)
+    participant TSA as FreeTSA (Internet)
+    participant DB as SQLite (USB)
+
+    DA->>PC: Scan Wi-Fi & BLE (or Audio)
+    PC-->>DA: Raw Radio Identifiers
+    
+    note over DA: Format as UTF-8 JSON<br/>Compress via zlib (Level 9)<br/>Calculate SHA-256 Digest
+    
+    alt Internet is available
+        DA->>TSA: Send SHA-256 Digest (RFC 3161 Req)
+        TSA-->>DA: Return CMS Signed Timestamp (TSR)
+        DA->>DB: Save TSR & mark TSA_SEALED
+    else Offline (No Internet)
+        note over DA: Insert SHA-256 into Pending Queue
+        DA->>DA: Build Offline Merkle Tree
+        DA->>DA: Sign Root with USB-local Ed25519 Key
+        DA->>DB: Save Signature & mark LOCAL_SEALED
+    end
+```
 
 Each capture contains a canonical evidence object with:
 
@@ -87,7 +139,7 @@ DigitalAlibi-<platform>/DigitalAlibi-<platform> watch --interval 60
 
 `watch` is deliberately not a host-installed service, login item, scheduled task, or daemon. It writes no retry state outside the USB working directory. Use `flush` for a one-time retry.
 
-## 4. Investigator quick start from a USB drive
+## 5. Investigator quick start from a USB drive
 
 ### Recommended USB layout
 
@@ -173,7 +225,7 @@ Exit codes:
 | `3` | Local verification found tampering, a mismatch, or a missing required TSR |
 | `130` | Operator interrupted the program |
 
-## 5. Database schema and manual review
+## 6. Database schema and manual review
 
 `digital_alibi.sqlite` contains three primary tables:
 
@@ -201,7 +253,7 @@ ORDER BY event_id;
 
 Never edit the database in place. Create a forensic working copy before manual inspection, hash both the source and working copy, and retain the original USB media according to laboratory policy.
 
-## 6. Building portable bundles with PyInstaller
+## 7. Building portable bundles with PyInstaller
 
 ### Why `--onedir`, not `--onefile`
 
@@ -282,7 +334,7 @@ Get-ChildItem .\dist\DigitalAlibi-windows-x86_64 -Recurse -File |
 
 Test the copied USB bundle in a controlled environment before any field use. Document bundle hash, operating system, machine ID, operator, policy approval, and time source in the case record.
 
-## 7. Autopsy ingest integration
+## 8. Autopsy ingest integration
 
 `Autopsy_DigitalAlibi_Ingest.py` is a Jython 2.7 **Data Source Ingest Module**. It searches a logical USB data source for `digital_alibi.sqlite`, extracts the SQLite content into the active Autopsy case temporary area, parses it through JDBC, verifies records, posts Blackboard artifacts, and deletes its temporary extracted files.
 
@@ -332,7 +384,7 @@ The module posts `TSK_INTERESTING_FILE_HIT` Blackboard artifacts associated with
 
 The ingest module cannot be fully exercised without a compatible installed Autopsy/Jython/Java environment and approved JARs. Validate it with known-good and deliberately tampered test media before operational deployment.
 
-## 8. Operational workflow
+## 9. Operational workflow
 
 1. **Prepare:** Use a write-tested, encrypted when appropriate, uniquely labelled acquisition USB. Copy a hashed native bundle and retain the release manifest.
 2. **Document:** Record authority, device condition, system clock display, network state, operator, and start time before execution.
@@ -343,7 +395,7 @@ The ingest module cannot be fully exercised without a compatible installed Autop
 7. **Verify:** Run `verify` from the case directory. Independently ingest a forensic image or logical copy into Autopsy and review Blackboard artifacts.
 8. **Report:** Describe collection method and limitations precisely. Do not overstate radio visibility as geolocation or identity proof.
 
-## 9. Development and validation
+## 10. Development and validation
 
 Runtime dependencies are in `requirements.txt`. Build-only dependency is in `requirements-build.txt`. The test suite uses Python’s standard `unittest` and creates test evidence only under `./.sandbox-test/`.
 
@@ -357,7 +409,7 @@ python -m unittest discover -s tests -v
 
 Tests cover canonicalisation, exact compressed evidence verification, BSSID normalisation, Merkle construction, Ed25519 local batch signatures, DER timestamp request construction, local path escape rejection, a no-radio offline capture path, and tamper detection. They mock physical radio/audio access and do not exercise a live TSA or actual Autopsy runtime.
 
-## 10. Project files
+## 11. Project files
 
 ```text
 .
@@ -371,7 +423,7 @@ Tests cover canonicalisation, exact compressed evidence verification, BSSID norm
 └── README.md                         # this manual
 ```
 
-## 11. Security review checklist before field deployment
+## 12. Security review checklist before field deployment
 
 - [ ] Build and test a bundle on each target OS/architecture.
 - [ ] Record exact package, executable, JAR, and TSA root certificate hashes.

@@ -338,6 +338,110 @@ def scan_ble(seconds: float) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     return stable, {"method": "bleak:two-pass", "scan_count": 2, "seconds_per_scan": seconds, "stable_count": len(stable)}
 
 
+def scan_arp() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
+    """Capture physical MAC addresses of wired/local network neighbors."""
+    records = []
+    try:
+        out = subprocess.check_output(["arp", "-a"], stderr=subprocess.STDOUT, timeout=5).decode("utf-8", "ignore")
+        mac_pattern = re.compile(r'([0-9a-fA-F]{1,2}[:-][0-9a-fA-F]{1,2}[:-][0-9a-fA-F]{1,2}[:-][0-9a-fA-F]{1,2}[:-][0-9a-fA-F]{1,2}[:-][0-9a-fA-F]{1,2})')
+        seen = set()
+        for line in out.splitlines():
+            match = mac_pattern.search(line)
+            if match:
+                mac = match.group(1).replace('-', ':').upper()
+                mac = ':'.join([p.zfill(2) for p in mac.split(':')])
+                if mac not in seen and mac != "FF:FF:FF:FF:FF:FF":
+                    seen.add(mac)
+                    records.append({"mac": mac})
+        return records, {"method": "arp -a", "error": None}
+    except Exception as exc:
+        return records, {"method": "arp -a", "error": str(exc)}
+
+
+def scan_monitors() -> Tuple[List[Dict[str, Optional[str]]], Dict[str, Any]]:
+    """Capture EDID serials and names of physically connected displays."""
+    sys_name = platform.system()
+    monitors = []
+    meta = {"method": "unknown", "error": None}
+    
+    if sys_name == "Windows":
+        meta["method"] = "wmi:WmiMonitorID"
+        try:
+            cmd = [
+                "powershell", "-NoProfile", "-Command",
+                r"Get-WmiObject WmiMonitorID -Namespace root\wmi -ErrorAction Stop | ForEach-Object { "
+                r"$man = [System.Text.Encoding]::ASCII.GetString($_.ManufacturerName) -replace '\0', ''; "
+                r"$ser = [System.Text.Encoding]::ASCII.GetString($_.SerialNumberID) -replace '\0', ''; "
+                r"$name = [System.Text.Encoding]::ASCII.GetString($_.UserFriendlyName) -replace '\0', ''; "
+                r"[PSCustomObject]@{ Manufacturer = $man; Serial = $ser; Name = $name } } | ConvertTo-Json -Compress"
+            ]
+            out = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=10).decode("utf-8", "ignore").strip()
+            if out:
+                parsed = json.loads(out)
+                if isinstance(parsed, dict):
+                    parsed = [parsed]
+                for item in parsed:
+                    monitors.append({
+                        "manufacturer": item.get("Manufacturer", "").strip() or None,
+                        "serial": item.get("Serial", "").strip() or None,
+                        "name": item.get("Name", "").strip() or None
+                    })
+        except Exception as exc:
+            meta["error"] = str(exc)
+            
+    elif sys_name == "Linux":
+        meta["method"] = "sysfs:drm/edid"
+        try:
+            drm_path = "/sys/class/drm"
+            if os.path.exists(drm_path):
+                for card in os.listdir(drm_path):
+                    status_path = os.path.join(drm_path, card, "status")
+                    edid_path = os.path.join(drm_path, card, "edid")
+                    if os.path.exists(status_path) and os.path.exists(edid_path):
+                        with open(status_path, "r") as f:
+                            if "connected" in f.read():
+                                with open(edid_path, "rb") as f2:
+                                    edid = f2.read()
+                                    if len(edid) >= 128:
+                                        serial = None
+                                        name = None
+                                        for offset in (54, 72, 90, 108):
+                                            if edid[offset:offset+3] == b'\x00\x00\x00':
+                                                tag = edid[offset+3]
+                                                text = edid[offset+5:offset+18].split(b'\n')[0].strip().decode('ascii', 'ignore')
+                                                if tag == 0xFF:
+                                                    serial = text
+                                                elif tag == 0xFC:
+                                                    name = text
+                                        mfg = None
+                                        if len(edid) >= 10:
+                                            raw_mfg = (edid[8] << 8) | edid[9]
+                                            c1 = chr(((raw_mfg >> 10) & 0x1F) + 64)
+                                            c2 = chr(((raw_mfg >> 5) & 0x1F) + 64)
+                                            c3 = chr((raw_mfg & 0x1F) + 64)
+                                            mfg = c1 + c2 + c3
+                                        monitors.append({"manufacturer": mfg, "serial": serial, "name": name, "interface": card})
+        except Exception as exc:
+            meta["error"] = str(exc)
+
+    elif sys_name == "Darwin":
+        meta["method"] = "system_profiler:displays"
+        try:
+            out = subprocess.check_output(["system_profiler", "SPDisplaysDataType", "-json"], stderr=subprocess.STDOUT, timeout=10).decode("utf-8", "ignore")
+            parsed = json.loads(out)
+            displays = parsed.get("SPDisplaysDataType", [])
+            for gpu in displays:
+                for monitor in gpu.get("spdisplays_ndrvs", []):
+                    monitors.append({
+                        "name": monitor.get("_name", ""),
+                        "resolution": monitor.get("_spdisplays_resolution", ""),
+                    })
+        except Exception as exc:
+            meta["error"] = str(exc)
+            
+    return monitors, meta
+
+
 def capture_audio_digest(seconds: float) -> Tuple[Optional[Dict[str, Any]], Dict[str, Any]]:
     """Record an in-memory mono sample and immediately discard it after hashing."""
     if seconds <= 0:
@@ -366,7 +470,7 @@ def capture_audio_digest(seconds: float) -> Tuple[Optional[Dict[str, Any]], Dict
         return None, {"method": "sounddevice", "error": "%s: %s" % (type(exc).__name__, exc)}
 
 
-def build_payload(capture_id: str, wifi: List[str], ble: List[Dict[str, Any]], audio: Optional[Dict[str, Any]], acquisition: Dict[str, Any]) -> Dict[str, Any]:
+def build_payload(capture_id: str, wifi: List[str], ble: List[Dict[str, Any]], arp: List[Dict[str, str]], monitors: List[Dict[str, Optional[str]]], audio: Optional[Dict[str, Any]], acquisition: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "schema": SCHEMA,
         "capture_id": capture_id,
@@ -375,6 +479,8 @@ def build_payload(capture_id: str, wifi: List[str], ble: List[Dict[str, Any]], a
         "sources": {
             "wifi_bssids": sorted(set(wifi)),
             "ble_beacons": sorted(ble, key=lambda item: item["address"]),
+            "arp_neighbors": sorted(arp, key=lambda item: item["mac"]),
+            "monitors": monitors,
             "audio_fingerprint": audio,
         },
         "acquisition": acquisition,
@@ -645,15 +751,32 @@ def do_capture(args: argparse.Namespace, store: EvidenceStore) -> int:
                 print("Pending TSA submissions: %(sealed)d sealed, %(failed)d deferred" % previous)
         wifi, wifi_meta = scan_wifi(store)
         ble, ble_meta = scan_ble(args.ble_seconds)
+        arp, arp_meta = scan_arp()
+        monitors, monitors_meta = scan_monitors()
+        
         audio = None
         audio_meta: Dict[str, Any] = {"method": "not-needed"}
-        if not wifi and not ble:
+        if not wifi and not ble and not arp and not monitors:
             audio, audio_meta = capture_audio_digest(args.audio_seconds)
-        acquisition = {"wifi": wifi_meta, "ble": ble_meta, "audio": audio_meta, "operator_note": args.note or None}
+            
+        acquisition = {
+            "wifi": wifi_meta, 
+            "ble": ble_meta, 
+            "arp": arp_meta,
+            "monitors": monitors_meta,
+            "audio": audio_meta, 
+            "operator_note": args.note or None
+        }
         capture_id = args.capture_id or ("capture-" + uuid.uuid4().hex)
-        payload = build_payload(capture_id, wifi, ble, audio, acquisition)
+        payload = build_payload(capture_id, wifi, ble, arp, monitors, audio, acquisition)
         _, compressed, digest = compressed_evidence(payload)
-        summary = {"wifi_bssid_count": len(wifi), "ble_stable_count": len(ble), "audio_fallback": audio is not None}
+        summary = {
+            "wifi_bssid_count": len(wifi), 
+            "ble_stable_count": len(ble), 
+            "arp_mac_count": len(arp),
+            "monitor_count": len(monitors),
+            "audio_fallback": audio is not None
+        }
         insert_capture(conn, payload, compressed, digest, args.tsa_url, summary)
         if args.no_tsa:
             signer = LocalSigner(store)

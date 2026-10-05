@@ -156,7 +156,7 @@ class DigitalAlibiTests(unittest.TestCase):
         store = core.EvidenceStore()
         conn = store.connect()
         try:
-            payload = core.build_payload("override", [], [], None, {"test": True})
+            payload = core.build_payload("override", [], [], [], [], None, {"test": True})
             _, compressed, digest = core.compressed_evidence(payload)
             core.insert_capture(conn, payload, compressed, digest, "https://stored.example/tsr", {})
             with mock.patch.object(core, "obtain_timestamp", return_value=b"test-token") as timestamp:

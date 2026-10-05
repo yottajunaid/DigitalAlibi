@@ -445,12 +445,28 @@ class DigitalAlibiIngestModule(DataSourceIngestModule):
         return hash_status[0] and tsr_status.startswith("TSA_SIGNATURE_VALID")
 
     def format_comment(self, record, hash_status, local_status, tsr_status):
+        import json
+        sources_desc = "unknown"
+        try:
+            if record["payload_json"]:
+                p = json.loads(record["payload_json"])
+                s = p.get("sources", {})
+                wifi_c = len(s.get("wifi_bssids", []))
+                ble_c = len(s.get("ble_beacons", []))
+                arp_c = len(s.get("arp_neighbors", []))
+                mon_c = len(s.get("monitors", []))
+                audio = "yes" if s.get("audio_fingerprint") else "no"
+                sources_desc = "WiFi: %d | BLE: %d | ARP: %d | Monitors: %d | Audio: %s" % (wifi_c, ble_c, arp_c, mon_c, audio)
+        except Exception:
+            pass
+            
         return (
             "Digital Alibi capture\n"
             "capture_id: %s\n"
             "captured_at_utc: %s\n"
             "evidence_sha256: %s\n"
             "tsa_status: %s\n"
+            "sources: %s\n"
             "hash_verification: %s\n"
             "local_merkle: %s\n"
             "rfc3161: %s"
@@ -459,6 +475,7 @@ class DigitalAlibiIngestModule(DataSourceIngestModule):
                 record["captured_at_utc"],
                 record["compressed_sha256"],
                 record["tsa_status"],
+                sources_desc,
                 hash_status[1],
                 local_status,
                 tsr_status,

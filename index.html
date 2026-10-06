@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Alibi | Cryptographic Ambient Sensing Framework</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#1e293b',
+                primaryTextColor: '#f8fafc',
+                primaryBorderColor: '#38bdf8',
+                lineColor: '#94a3b8',
+                secondaryColor: '#0f172a',
+                tertiaryColor: '#1e293b'
+            }
+        });
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="DigitalAlibi_Logo.svg">
+</head>
+<body>
+    
+    <!-- Animated Background Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="noise-overlay"></div>
+
+    <nav class="glass-nav">
+        <div class="nav-content">
+            <div class="logo-area">
+                <img src="DigitalAlibi_Logo.svg" alt="Digital Alibi Logo" class="nav-logo">
+                <span class="nav-title">Digital Alibi</span>
+            </div>
+            <div class="nav-links">
+                <a href="#about">Architecture</a>
+                <a href="#diagrams">Sequences</a>
+                <a href="#docs">Docs</a>
+                <a href="https://github.com/yottajunaid/DigitalAlibi" target="_blank" class="github-btn">View on GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        
+        <!-- Hero Section -->
+        <section class="hero glass-panel">
+            <img src="DigitalAlibi_Logo.svg" alt="Digital Alibi Hero Logo" class="hero-logo">
+            <h1 class="hero-title">Prove Exactly <span>Where</span> You Were.</h1>
+            <p class="hero-subtitle">A zero-footprint, cryptographic ambient sensing framework that mathematically locks digital evidence to a physical room.</p>
+            
+            <div class="download-grid">
+                <a href="https://github.com/yottajunaid/DigitalAlibi/releases/download/v1.0.0/DigitalAlibi_v1.0.0_Windows.zip" class="btn btn-windows">
+                    <svg viewBox="0 0 87.6 87.6" width="24" height="24"><path fill="currentColor" d="M0 12.4l35.7-4.9v35.3H0V12.4zm0 35.3h35.7v35.3l-35.7-4.9V47.7zm40.5-40.4L87.6 0v41.6H40.5V7.3zm0 41.6h47.1v41.6l-47.1-7.2V48.9z"/></svg>
+                    <div>
+                        <strong>Download for Windows</strong>
+                        <span>v1.0.0 Portable (.zip)</span>
+                    </div>
+                </a>
+                <a href="https://github.com/yottajunaid/DigitalAlibi/releases/download/v1.0.0/DigitalAlibi_v1.0.0_Linux.zip" class="btn btn-linux">
+                    <svg viewBox="0 0 448 512" width="24" height="24"><path fill="currentColor" d="M220.8 123.3c1 .5 1.8 1.7 3 1.7 1.1 0 2.8-.4 2.9-1.5.2-1.4-1.9-2.3-3.2-2.9-1.7-.7-3.9-1-5.5-.1-.4.2-.8.7-.6 1.1.3 1.3 2.3 1.1 3.4 1.7zm-21.9 1.7c1.2 0 2-1.2 3-1.7 1.1-.6 3.1-.4 3.5-1.7.2-.4-.2-.9-.6-1.1-1.6-.9-3.7-.6-5.5.1-1.3.6-3.4 1.5-3.2 2.9.1 1 1.8 1.5 2.8 1.5zM420 432.4c-4.9-7-40.8-73.8-51.6-96.2-12.7-26.2-21.7-52.6-33.8-77.9-15.6-32.9-38.7-65.7-72.2-80.4-8.3-3.6-18.7-7.2-28.5-4.4-4.2 1.2-8.2 3.6-12 6-4.5 2.8-10.4 7-15.9 7.2-5.4.1-11.2-4-15.6-6.8-4-2.5-8.2-5-12.6-6-9.6-2.2-19.6 1.4-27.7 5.1-32.6 14.8-54.7 46.8-69.5 78.7-12 25.5-20.9 51.5-33.5 77.4-11.2 23-48.4 91-53.7 97.9-2.8 3.6-4.4 7.6-5 12-.6 4.3.2 8.8 2.5 12.6 2.3 3.9 5.8 6.9 10 8.6 4.1 1.8 8.8 2.3 13.3 1.6 4.5-.8 8.6-3.1 11.9-6.3 3.3-3.1 5.8-7.2 7.2-11.5 1.5-4.4 1.9-9.1 1.1-13.6-.8-4.5-2.8-8.7-5.8-12.2-4.9-5.7-41.2-71-52-94.2-12.6-26.4-21.8-53-33.9-78.5-15.4-32.5-37.5-64.8-70.2-79.6-8.2-3.7-18.7-7.4-28.7-4.8-4.2 1.1-8.2 3.5-11.9 5.8-4.4 2.8-10.2 6.8-15.6 7-5.4.2-11.2-3.8-15.6-6.6-4-2.5-8.2-5.1-12.7-6.2-9.6-2.3-19.8 1-27.9 4.6-32.6 14.5-54.8 46-69.8 77.4-12 25.3-21 51-33.6 76.5-11.1 22.8-48.3 91.1-53.7 98-2.9 3.7-4.6 7.8-5.1 12.2-.6 4.4.2 8.9 2.5 12.8 2.3 3.9 5.8 7 10.1 8.8 4.2 1.8 9 2.3 13.5 1.6 4.6-.8 8.7-3.2 12-6.4 3.3-3.2 5.9-7.3 7.3-11.7 1.5-4.4 1.8-9.1 1-13.7-.8-4.6-2.9-8.9-5.9-12.4zm-143.2-95.2c-1.3 5.3-7.5 7.1-11.7 3.5-3.8-3.3-3.5-9.4 1-12.2 4.1-2.5 12-2.1 10.7 8.7zm-25.2-31.5c-4.2-2.3-9.5-2-12.8 2.1-3.2 4.1-1.7 10.6 3 12.8 4.2 1.9 10.4.3 12.6-4 2-4.1-.1-9.4-2.8-10.9zm-38.3 50.8c-3.1 3-2.2 8.7 1.8 10.6 4.1 1.9 9.8.7 12.3-3.4 2.2-3.8-1-9.4-5.3-10.2-3.8-.7-7.2 1.2-8.8 3zm-27.2-38.4c-4.1-1.9-9.8-1-12.4 3.2-2.6 4.2.3 10.3 4.9 11.9 4.5 1.6 10.5-1.5 11.8-6 1.3-4.3-1.6-8-4.3-9.1z"/></svg>
+                    <div>
+                        <strong>Download for Linux</strong>
+                        <span>v1.0.0 Portable (.zip)</span>
+                    </div>
+                </a>
+                <a href="https://github.com/yottajunaid/DigitalAlibi" class="btn btn-mac">
+                    <svg viewBox="0 0 384 512" width="24" height="24"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+                    <div>
+                        <strong>Build for macOS</strong>
+                        <span>View Source on GitHub</span>
+                    </div>
+                </a>
+            </div>
+            <p class="license-notice">Proprietary Software. Explicit permission required for distribution. Built by Junaid Nizam Quadri.</p>
+        </section>
+
+        <!-- Feature Grid -->
+        <section id="about" class="feature-grid">
+            <div class="glass-card">
+                <div class="card-icon">📡</div>
+                <h3>Ambient Capture</h3>
+                <p>Takes a highly volatile snapshot of the invisible "radio room" around you, capturing Wi-Fi routers, BLE beacons, and ambient acoustic room entropy.</p>
+            </div>
+            <div class="glass-card">
+                <div class="card-icon">🔐</div>
+                <h3>Cryptographic Sealing</h3>
+                <p>Mathematically hashes the exact combination of localized spatial data into an undeniable digital anchor that cannot be spoofed after the fact.</p>
+            </div>
+            <div class="glass-card">
+                <div class="card-icon">🏛️</div>
+                <h3>Time Authority Lock</h3>
+                <p>Transmits the hash to an internet Time Authority (FreeTSA) to generate an RFC 3161 Timestamp, locking the chain of custody permanently.</p>
+            </div>
+        </section>
+
+        <!-- Diagram Section -->
+        <section id="diagrams" class="glass-panel" style="margin-top: 40px; padding: 40px;">
+            <h2 class="section-title">Cryptographic Sequence Diagram</h2>
+            <p style="color: #94a3b8; margin-bottom: 30px;">This flowchart documents the precise chain of custody from ambient capture through the forensic lab ingestion process.</p>
+            
+            <div class="mermaid-container">
+                <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant O as Operator UI
+    participant E as Capture Engine
+    participant C as Crypto Pipeline
+    participant A as Autopsy (Lab)
+
+    O->>E: Initiate Capture (--note)
+    activate E
+    E->>E: Scan Wi-Fi & BLE
+    E->>E: Record Audio & Hash to Memory
+    E->>C: Commit to digital_alibi.sqlite
+    deactivate E
+    
+    activate C
+    C->>C: Generate SHA-256 of SQLite DB
+    C->>+C: Transmit Hash to FreeTSA
+    C-->>-C: Receive .tsr (RFC 3161 Token)
+    C->>C: Sign Hash + TSR with Ed25519
+    C->>O: Return .sig and evidence bundle
+    deactivate C
+
+    Note over O,A: Physical Transport to Forensic Lab
+
+    O->>A: Mount USB Image
+    activate A
+    A->>A: Jython Module Parses SQLite
+    A->>A: Verify Ed25519 Signature (.sig)
+    A->>A: Verify FreeTSA Cert Chain (.tsr)
+    A-->>O: Display Court-Ready Artifacts
+    deactivate A
+                </pre>
+            </div>
+        </section>
+
+        <!-- Docs / Configuration Section -->
+        <section id="docs" class="glass-panel" style="margin-top: 40px; padding: 40px;">
+            <h2 class="section-title">Configuration & Usage</h2>
+            
+            <div class="doc-block">
+                <h3>Zero-Footprint Architecture</h3>
+                <p>The core program confines every application-created persistent artifact directly to your working directory (e.g. a Forensic USB Drive). It never writes to the host operating system's registry or AppData.</p>
+                <div class="terminal">
+                    # Evidence Database<br>
+                    ./digital_alibi.sqlite<br>
+                    <br>
+                    # RFC 3161 Timestamp Tokens<br>
+                    ./tsr/&lt;capture-id&gt;.tsr<br>
+                    <br>
+                    # Local Offline Signing Keys<br>
+                    ./digital_alibi_ed25519_private.pem<br>
+                    ./digital_alibi_ed25519_public.pem
+                </div>
+            </div>
+
+            <div class="doc-block" style="margin-top: 30px;">
+                <h3>Advanced CLI Commands</h3>
+                <p>If you want to run the tool continuously in a highly volatile environment (like an airport or coffee shop), use the <code>watch</code> command to take a cryptographically sealed snapshot every 60 seconds:</p>
+                <div class="terminal">
+                    <span class="prompt">$</span> ./DigitalAlibi-linux-x86_64 watch --interval 60
+                </div>
+                <p style="margin-top: 15px;">Other available commands:</p>
+                <div class="terminal">
+                    <span class="prompt">capture</span> [--tsa-url HTTPS_URL] [--no-tsa] [--ble-seconds N] [--audio-seconds N] [--capture-id ID] [--note TEXT]<br>
+                    <span class="prompt">flush</span>   [--tsa-url HTTPS_URL] [--limit N]
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="glass-footer">
+        <p>Copyright &copy; 2026 Junaid Nizam Quadri. All Rights Reserved.</p>
+        <p>A Proprietary Forensic Research Project.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -795,6 +795,7 @@ def do_capture(args: argparse.Namespace, store: EvidenceStore) -> int:
             else:
                 detail = "RFC 3161 token written"
         print(json.dumps({"capture_id": capture_id, "sha256": digest, "status": status, "detail": detail, "output_dir": str(store.root)}, sort_keys=True))
+        generate_html_report(store)
         return 0
     finally:
         conn.close()
@@ -928,6 +929,72 @@ def validate_args(args: argparse.Namespace) -> None:
             raise DigitalAlibiError("--tsa-url must be a complete HTTPS URL")
 
 
+
+def generate_html_report(store):
+    html_path = os.path.join(store.root, "Digital_Alibi_Report.html")
+    try:
+        import sqlite3, json
+        conn = sqlite3.connect(store.database_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.execute("SELECT * FROM captures ORDER BY created_at_utc DESC")
+        rows = cursor.fetchall()
+        
+        html = [
+            "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Digital Alibi Report</title>",
+            "<style>",
+            "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f4f4f5; color: #18181b; padding: 20px; }",
+            ".container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }",
+            "h1 { color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }",
+            ".capture-card { border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; margin-bottom: 20px; }",
+            ".valid-badge { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }",
+            ".invalid-badge { background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }",
+            "table { width: 100%; border-collapse: collapse; margin-top: 15px; }",
+            "th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e5e7eb; }",
+            "th { background: #f9fafb; font-weight: 600; color: #4b5563; }",
+            "</style></head><body><div class='container'>",
+            "<h1>Digital Alibi - Forensic Environment Report</h1>",
+            f"<p><strong>Generated Path:</strong> {store.root}</p>"
+        ]
+        
+        if not rows:
+            html.append("<p>No evidence captures found in this database.</p>")
+        else:
+            for row in rows:
+                p = json.loads(row["payload_json"])
+                note = p.get("acquisition", {}).get("operator_note", "N/A")
+                s = p.get("sources", {})
+                
+                def get_str(x):
+                    if isinstance(x, dict):
+                        return str(x.get('mac', x.get('bssid', str(x))))
+                    return str(x)
+                wifi = s.get("wifi_bssids", [])
+                ble = s.get("ble_beacons", [])
+                arp = s.get("arp_neighbors", [])
+                mon = s.get("monitors", [])
+                
+                status_color = "valid-badge" if "VALID" in row["tsa_status"] or "SEALED" in row["tsa_status"] else "invalid-badge"
+                
+                html.append("<div class='capture-card'>")
+                html.append(f"<h2>Capture: {row['captured_at_utc']}</h2>")
+                html.append(f"<p><strong>Operator Note:</strong> {note}</p>")
+                html.append(f"<p><strong>TSA Status:</strong> <span class='{status_color}'>{row['tsa_status']}</span></p>")
+                html.append(f"<p><strong>SHA-256:</strong> {row['compressed_sha256']}</p>")
+                
+                html.append("<table><tr><th>Evidence Type</th><th>Count</th><th>Details</th></tr>")
+                html.append(f"<tr><td>Wi-Fi Routers</td><td>{len(wifi)}</td><td>{', '.join([get_str(w) for w in wifi[:5]])}{'...' if len(wifi)>5 else ''}</td></tr>")
+                html.append(f"<tr><td>Wired (ARP)</td><td>{len(arp)}</td><td>{', '.join([get_str(a) for a in arp])}</td></tr>")
+                html.append(f"<tr><td>Monitors (EDID)</td><td>{len(mon)}</td><td>{', '.join([m.get('manufacturer', 'Unknown') for m in mon])}</td></tr>")
+                html.append(f"<tr><td>Bluetooth (BLE)</td><td>{len(ble)}</td><td>{', '.join([get_str(b) for b in ble[:5]])}{'...' if len(ble)>5 else ''}</td></tr>")
+                html.append("</table></div>")
+                
+        html.append("</div></body></html>")
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(html))
+    except Exception as e:
+        print("Error generating HTML: " + str(e))
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -959,5 +1026,47 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 130
 
 
+
 if __name__ == "__main__":
+    import sys
+    # --- DRAG AND DROP VERIFICATION ---
+    if len(sys.argv) == 2 and sys.argv[1].endswith(".sqlite"):
+        print("==================================================")
+        print(" DIGITAL ALIBI - Drag & Drop Verification ")
+        print("==================================================")
+        print("Target: " + sys.argv[1] + "\n")
+        
+        # Override the db path temporarily just for verify
+        os.environ["DIGITAL_ALIBI_DB_PATH"] = sys.argv[1]
+        
+        sys.argv = [sys.argv[0], "verify"]
+        try:
+            main()
+        except SystemExit:
+            pass
+        except Exception as e:
+            print(str(e))
+        input("\nVerification complete. Press Enter to exit...")
+        sys.exit(0)
+
+    # --- INTERACTIVE MODE (Double-Click) ---
+    if len(sys.argv) == 1:
+        print("==================================================")
+        print(" D I G I T A L   A L I B I   (Forensic Triage) ")
+        print("==================================================")
+        print("No command-line arguments provided. Starting interactive mode.\n")
+        try:
+            note = input("Enter an Operator Note (e.g., 'Start of acquisition in suspect living room'):\n> ")
+        except EOFError:
+            note = "Automated test"
+        print("\nScanning radio environment and gathering hardware data... Please wait.")
+        sys.argv = [sys.argv[0], "capture", "--note", note]
+        try:
+            main()
+        except SystemExit:
+            pass
+        input("\nCapture complete! Evidence and HTML Report saved to this folder.\nPress Enter to exit...")
+        sys.exit(0)
+
     sys.exit(main())
+

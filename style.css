@@ -398,8 +398,111 @@ body {
 }
 
 /* Responsive */
-@media (max-width: 900px) {
-    .feature-grid { grid-template-columns: 1fr; }
     .hero-title { font-size: 56px; }
     .glass-panel { padding: 40px 24px; }
+}
+
+/* =========================================
+   Responsive & Mobile Overrides 
+   ========================================= */
+
+/* Tablet & Smaller Desktop */
+@media (max-width: 992px) {
+    .container { margin-top: 120px; }
+    .hero-title { font-size: 56px; }
+    .feature-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .glass-panel { padding: 48px 32px; }
+}
+
+/* Mobile Devices */
+@media (max-width: 768px) {
+    /* Container & Layout */
+    .container { 
+        margin-top: 100px; 
+        padding: 0 16px; 
+    }
+    .glass-panel { 
+        padding: 32px 20px; 
+        border-radius: 24px;
+        margin-bottom: 32px;
+    }
+    
+    /* Navigation */
+    .nav-content {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+    }
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .github-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* Hero Section */
+    .hero { margin-bottom: 40px; }
+    .hero-title { 
+        font-size: 40px; 
+        letter-spacing: -1px;
+    }
+    .hero-subtitle {
+        font-size: 16px;
+        margin-bottom: 32px;
+    }
+    .hero-logo {
+        width: 72px;
+        height: 72px;
+    }
+    
+    /* Buttons */
+    .download-grid { 
+        flex-direction: column;
+        width: 100%;
+    }
+    .btn { 
+        width: 100%; 
+        justify-content: center; 
+        padding: 16px;
+    }
+    
+    /* Features */
+    .feature-grid { 
+        grid-template-columns: 1fr; 
+        gap: 16px; 
+        margin-top: 16px;
+    }
+    .feature-card { 
+        padding: 24px; 
+    }
+    
+    /* Typography */
+    .section-title { font-size: 28px; letter-spacing: -0.5px; }
+    .section-subtitle { font-size: 15px; margin-bottom: 24px; }
+    
+    /* Mermaid Diagram Overflow */
+    /* On mobile, we keep the diagram large but allow smooth horizontal swiping */
+    .mermaid-wrapper {
+        padding: 20px 10px;
+        border-radius: 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+    }
+    .mermaid {
+        margin: 0;
+        /* allow width to expand beyond viewport to preserve readability */
+    }
+    
+    /* Terminal Block */
+    .terminal {
+        font-size: 12px;
+        padding: 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 }

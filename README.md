@@ -61,7 +61,6 @@ Digital Alibi is an **evidence-assistance tool**, not a determination of physica
 ### 3. Architecture and Workflow
 ```mermaid
 graph TD
-    %% Define styles
     classDef startEnd fill:#1f2937,stroke:#374151,stroke-width:2px,color:#fff;
     classDef action fill:#2563eb,stroke:#1d4ed8,stroke-width:2px,color:#fff;
     classDef decision fill:#059669,stroke:#047857,stroke-width:2px,color:#fff;
@@ -70,8 +69,8 @@ graph TD
     A([Start: Plug USB into Target PC]):::startEnd --> B[Run: capture]:::action
     B --> C{Detect Radios}:::decision
     
-    C -->|Wi-Fi/BLE/Tether/Display found| D[Extract Hardware Identifiers]:::action
-    C -->|No radios or hardware found| E[Capture Audio Digest]:::action
+    C -->|Wi-Fi/BLE/Tether/Display| D[Extract Hardware Identifiers]:::action
+    C -->|No radios found| E[Capture Audio Digest]:::action
     
     D --> F{Internet Available?}:::decision
     E --> F
@@ -83,6 +82,42 @@ graph TD
     H --> I
     
     I --> J([End: Unplug USB]):::startEnd
+```
+
+### 4. Cryptographic Sequence of Custody
+*(Detailed horizontal data exchange)*
+```mermaid
+sequenceDiagram
+    autonumber
+    participant O as Operator UI
+    participant E as Capture Engine
+    participant C as Crypto Pipeline
+    participant A as Autopsy (Lab)
+
+    O->>E: Initiate Capture (--note)
+    activate E
+    E->>E: Scan Wi-Fi & BLE
+    E->>E: Record Audio & Hash to Memory
+    E->>C: Commit to digital_alibi.sqlite
+    deactivate E
+    
+    activate C
+    C->>C: Generate SHA-256 of SQLite DB
+    C->>+C: Transmit Hash to FreeTSA
+    C-->>-C: Receive .tsr (RFC 3161 Token)
+    C->>C: Sign Hash + TSR with Ed25519
+    C->>O: Return .sig and evidence bundle
+    deactivate C
+
+    Note over O,A: Physical Transport to Forensic Lab
+
+    O->>A: Mount USB Image
+    activate A
+    A->>A: Jython Module Parses SQLite
+    A->>A: Verify Ed25519 Signature (.sig)
+    A->>A: Verify FreeTSA Cert Chain (.tsr)
+    A-->>O: Display Court-Ready Artifacts
+    deactivate A
 ```
 
 ### 4. Zero-footprint definition
@@ -117,5 +152,13 @@ python build_forensic_usb.py
 ```
 Output will be inside the `dist/` folder.
 
-## License and support
-No license file is included in this initial implementation. Establish institutional licensing, secure code review, reproducible builds, dependency pinning, release signing, and formal validation before claiming production forensic certification.
+## Copyright and License
+**PROPRIETARY AND CONFIDENTIAL**
+
+Copyright &copy; 2026 **Junaid Nizam Quadri**. All Rights Reserved.
+
+This repository is governed by a strict proprietary license (see the `LICENSE` file). 
+* **Permission is Required:** You may not modify, distribute, or publish this code without explicit written consent from the author.
+* **Mandatory Attribution:** Any authorized use or academic reference of this software must provide full credit to Junaid Nizam Quadri.
+
+Please contact the author for licensing inquiries, academic usage permissions, or formal forensic validation.

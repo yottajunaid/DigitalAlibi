@@ -77,7 +77,7 @@ try:
     from org.bouncycastle.jce.provider import BouncyCastleProvider
     from org.bouncycastle.cms.jcajce import JcaSimpleSignerInfoVerifierBuilder
     from org.bouncycastle.cert.jcajce import JcaX509CertificateConverter
-    from org.bouncycastle.tsp import TimeStampToken
+    from org.bouncycastle.tsp import TimeStampToken, TimeStampResponse
     BC_AVAILABLE = True
 except ImportError:
     BC_AVAILABLE = False
@@ -161,13 +161,6 @@ class DigitalAlibiIngestModule(DataSourceIngestModule):
                 self.create_status_artifact(database_file, "Digital Alibi database could not be parsed: " + str(ex), "ERROR")
             progressBar.progress(database_count)
 
-        if total_records:
-            try:
-                IngestServices.getInstance().fireModuleDataEvent(
-                    ModuleDataEvent(MODULE_NAME, BlackboardArtifact.ARTIFACT_TYPE.TSK_INTERESTING_FILE_HIT, None)
-                )
-            except Exception as ex:
-                self.log(Level.WARNING, "Unable to fire Blackboard event: " + str(ex))
         self.post_message(
             IngestMessage.MessageType.DATA,
             "Processed %d Digital Alibi capture record(s) from %d database(s); %d database error(s)." % (total_records, database_count, errors),
@@ -376,7 +369,8 @@ class DigitalAlibiIngestModule(DataSourceIngestModule):
             candidate = self.select_tsr_candidate(database_file, candidates, record)
             ContentUtils.writeToFile(candidate, local_tsr)
             token_bytes = self.read_bytes(local_tsr)
-            token = TimeStampToken(CMSSignedData(token_bytes))
+            resp = TimeStampResponse(token_bytes)
+            token = resp.getTimeStampToken()
             imprint = self.bytes_to_hex(token.getTimeStampInfo().getMessageImprintDigest())
             if imprint != record["tsa_message_imprint"]:
                 return "TSA_INVALID: RFC 3161 message imprint mismatch"

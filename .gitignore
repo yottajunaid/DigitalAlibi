@@ -10,3 +10,7 @@ digital_alibi_ed25519_private.pem
 digital_alibi_ed25519_public.pem
 tsr/
 .pytest_cache/
+*.html
+digital_alibi_*.sqlite
+.venv-wine/
+Digital_Alibi_IEEE_Paper.tex

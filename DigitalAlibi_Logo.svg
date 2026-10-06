@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="silver" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="50%" stop-color="#cbd5e1" />
+      <stop offset="100%" stop-color="#64748b" />
+    </linearGradient>
+    
+    <mask id="key-mask">
+      <rect x="0" y="0" width="512" height="512" fill="white" />
+      <circle cx="286" cy="108" r="24" fill="black" />
+    </mask>
+  </defs>
+
+  <!-- Shield Outline -->
+  <path d="M256 48 C150 88 80 96 80 96 V256 C80 360 180 440 256 480 C332 440 432 360 432 256 V96 C432 96 362 88 256 48 Z" 
+        fill="none" stroke="#1E293B" stroke-width="24" stroke-linejoin="round" />
+  
+  <!-- Key Group (Scaled down to 72% to guarantee a large gap inside the narrowing crest shield) -->
+  <g transform="translate(256, 256) rotate(45) scale(0.72) translate(-256, -256)">
+     <!-- 3D Extrusion (Shadow) -->
+     <path d="
+        M 256 58 
+        A 80 80 0 0 0 206 200
+        L 206 354
+        L 306 454
+        L 306 390 L 256 390 L 256 340 L 306 340
+        L 306 320 L 276 320 L 276 280 L 306 280
+        L 306 260 L 290 260 L 290 220 L 306 220
+        L 306 200
+        A 80 80 0 0 0 256 58 Z
+     " fill="#334155" transform="translate(8, 8)" mask="url(#key-mask)" />
+     
+     <!-- Main Silver Key -->
+     <path d="
+        M 256 58 
+        A 80 80 0 0 0 206 200
+        L 206 354
+        L 306 454
+        L 306 390 L 256 390 L 256 340 L 306 340
+        L 306 320 L 276 320 L 276 280 L 306 280
+        L 306 260 L 290 260 L 290 220 L 306 220
+        L 306 200
+        A 80 80 0 0 0 256 58 Z
+     " fill="url(#silver)" mask="url(#key-mask)" />
+
+     <!-- Inner Cutout Bevel on Bottom-Right -->
+     <path d="M 269 125 A 24 24 0 0 0 303 91" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.9" />
+     
+     <!-- Glossy Reflection Top-Left -->
+     <path d="M 256 58 A 80 80 0 0 0 176 138 A 80 80 0 0 1 256 78 Z" fill="#ffffff" opacity="0.5" />
+     
+     <!-- Groove (Centered in the remaining solid shaft) -->
+     <line x1="227" y1="210" x2="227" y2="360" stroke="#475569" stroke-width="8" stroke-linecap="round" />
+     <line x1="233" y1="210" x2="233" y2="360" stroke="#f8fafc" stroke-width="6" stroke-linecap="round" opacity="0.8" />
+  </g>
+</svg>

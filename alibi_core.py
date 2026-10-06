@@ -982,10 +982,10 @@ def generate_html_report(store):
                 html.append(f"<p><strong>SHA-256:</strong> {row['compressed_sha256']}</p>")
                 
                 html.append("<table><tr><th>Evidence Type</th><th>Count</th><th>Details</th></tr>")
-                html.append(f"<tr><td>Wi-Fi Routers</td><td>{len(wifi)}</td><td>{', '.join([get_str(w) for w in wifi[:5]])}{'...' if len(wifi)>5 else ''}</td></tr>")
+                html.append(f"<tr><td>Wi-Fi Routers</td><td>{len(wifi)}</td><td>{', '.join([get_str(w) for w in wifi])}</td></tr>")
                 html.append(f"<tr><td>Wired (ARP)</td><td>{len(arp)}</td><td>{', '.join([get_str(a) for a in arp])}</td></tr>")
                 html.append(f"<tr><td>Monitors (EDID)</td><td>{len(mon)}</td><td>{', '.join([m.get('manufacturer', 'Unknown') for m in mon])}</td></tr>")
-                html.append(f"<tr><td>Bluetooth (BLE)</td><td>{len(ble)}</td><td>{', '.join([get_str(b) for b in ble[:5]])}{'...' if len(ble)>5 else ''}</td></tr>")
+                html.append(f"<tr><td>Bluetooth (BLE)</td><td>{len(ble)}</td><td>{', '.join([get_str(b) for b in ble])}</td></tr>")
                 html.append("</table></div>")
                 
         html.append("</div></body></html>")

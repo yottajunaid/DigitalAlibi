@@ -397,10 +397,6 @@ body {
     font-weight: 500;
 }
 
-/* Responsive */
-    .hero-title { font-size: 56px; }
-    .glass-panel { padding: 40px 24px; }
-}
 
 /* =========================================
    Responsive & Mobile Overrides 

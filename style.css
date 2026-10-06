@@ -345,13 +345,20 @@ body {
 }
 
 .mermaid {
-    min-width: 800px;
+    width: 100%;
     margin: 0 auto;
+    display: flex;
+    justify-content: center;
 }
 
+/* Force the actual SVG to be massive */
 .mermaid svg {
-    max-width: 100% !important;
+    width: 100% !important;
+    max-width: 1200px !important;
+    min-width: 900px !important;
     height: auto !important;
+    transform: scale(1.1);
+    transform-origin: center top;
 }
 
 /* Documentation Terminal (Light Apple Style) */

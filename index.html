@@ -2,7 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Dynamic Viewport Script to force Desktop Mode by default on Mobile -->
+    <script>
+        const viewPref = localStorage.getItem('viewPref') || 'desktop';
+        const viewport = document.createElement('meta');
+        viewport.name = "viewport";
+        viewport.id = "viewportMeta";
+        if (viewPref === 'mobile') {
+            viewport.content = "width=device-width, initial-scale=1.0";
+        } else {
+            viewport.content = "width=1200"; // Force desktop layout width
+        }
+        document.head.appendChild(viewport);
+    </script>
     <title>Digital Alibi | Cryptographic Ambient Sensing</title>
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
@@ -189,6 +201,11 @@ sequenceDiagram
     <footer class="glass-footer">
         <p>&copy; 2026 Junaid Nizam Quadri. All Rights Reserved.</p>
     </footer>
+
+    
+    <button id="viewToggleBtn" class="view-toggle-btn" style="display: none;">
+        <span id="viewToggleIcon">📱</span> <span id="viewToggleText">Switch to Mobile View</span>
+    </button>
 
     <script src="script.js"></script>
 </body>

@@ -68,7 +68,9 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleBtn.style.display = 'flex';
         
         // Update button text based on current state
-        const currentPref = localStorage.getItem('viewPref') || 'desktop';
+        let currentPref = 'desktop';
+        try { currentPref = localStorage.getItem('viewPref') || 'desktop'; } catch(e) {}
+        
         if (currentPref === 'desktop') {
             toggleIcon.textContent = '📱';
             toggleText.textContent = 'Switch to Mobile View';
@@ -78,14 +80,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         toggleBtn.addEventListener('click', () => {
-            const currentPref = localStorage.getItem('viewPref') || 'desktop';
-            if (currentPref === 'desktop') {
-                localStorage.setItem('viewPref', 'mobile');
+            let pref = 'desktop';
+            try { pref = localStorage.getItem('viewPref') || 'desktop'; } catch(e) {}
+            
+            if (pref === 'desktop') {
+                try { localStorage.setItem('viewPref', 'mobile'); } catch(e) {}
                 viewportMeta.content = "width=device-width, initial-scale=1.0";
                 toggleIcon.textContent = '💻';
                 toggleText.textContent = 'Switch to Desktop View';
             } else {
-                localStorage.setItem('viewPref', 'desktop');
+                try { localStorage.setItem('viewPref', 'desktop'); } catch(e) {}
                 viewportMeta.content = "width=1200";
                 toggleIcon.textContent = '📱';
                 toggleText.textContent = 'Switch to Mobile View';

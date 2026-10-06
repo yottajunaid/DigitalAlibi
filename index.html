@@ -4,16 +4,25 @@
     <meta charset="UTF-8">
     <!-- Dynamic Viewport Script to force Desktop Mode by default on Mobile -->
     <script>
-        const viewPref = localStorage.getItem('viewPref') || 'desktop';
-        const viewport = document.createElement('meta');
-        viewport.name = "viewport";
-        viewport.id = "viewportMeta";
-        if (viewPref === 'mobile') {
-            viewport.content = "width=device-width, initial-scale=1.0";
-        } else {
-            viewport.content = "width=1200"; // Force desktop layout width
+        try {
+            const viewPref = localStorage.getItem('viewPref') || 'desktop';
+            const viewport = document.createElement('meta');
+            viewport.name = "viewport";
+            viewport.id = "viewportMeta";
+            if (viewPref === 'mobile') {
+                viewport.content = "width=device-width, initial-scale=1.0";
+            } else {
+                viewport.content = "width=1200"; // Force desktop layout width
+            }
+            document.head.appendChild(viewport);
+        } catch (e) {
+            // Fallback if localStorage is blocked (e.g., incognito or embedded browser)
+            const viewport = document.createElement('meta');
+            viewport.name = "viewport";
+            viewport.id = "viewportMeta";
+            viewport.content = "width=1200";
+            document.head.appendChild(viewport);
         }
-        document.head.appendChild(viewport);
     </script>
     <title>Digital Alibi | Cryptographic Ambient Sensing</title>
     <script type="module">

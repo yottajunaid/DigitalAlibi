@@ -45,8 +45,8 @@ graph TD
     A([Start: Plug USB into Target PC]):::startEnd --> B[Run: capture]:::action
     B --> C{Detect Radios}:::decision
     
-    C -->|Wi-Fi/BLE found| D[Extract MAC Addresses]:::action
-    C -->|No radios found| E[Capture Audio Digest]:::action
+    C -->|Wi-Fi/BLE/Tether/Display found| D[Extract Hardware Identifiers]:::action
+    C -->|No radios or hardware found| E[Capture Audio Digest]:::action
     
     D --> F{Internet Available?}:::decision
     E --> F
@@ -66,6 +66,8 @@ graph TD
 |---|---|---|
 | Wi-Fi | Native OS command only: `netsh wlan`, `nmcli`, or `airport -s` | Sorted, de-duplicated BSSIDs, command outcome metadata |
 | Bluetooth LE | `bleak`, two scans, intersection of MAC-form identifiers | Stable BLE hardware MACs and available RSSI values |
+| Wired Networks / Tethering | Native OS command only: `arp -a` | Hardware MAC addresses of connected peers on the local subnet |
+| External Displays | EDID capture (Windows: WMI/Registry, Linux: xrandr/sysfs, macOS: ioreg) | Connected monitor serial numbers, manufacturer IDs, and models |
 | Audio fallback | `sounddevice`, 16 kHz mono PCM signed 16-bit, 10 seconds by default | SHA-256 of in-memory PCM, sample parameters, no audio content |
 
 No custom radio drivers, monitor mode, packet capture, SSIDs, BLE names, audio files, cloud uploads, or user-profile logs are intentionally used.
@@ -102,7 +104,7 @@ Each capture contains a canonical evidence object with:
 - randomly generated capture ID, unless supplied by the operator
 - UTC capture timestamp
 - platform system, release, and machine fields
-- Wi-Fi BSSIDs, stable BLE records, and optional audio fingerprint
+- Wi-Fi BSSIDs, stable BLE records, wired ARP peers, monitor EDID serials, and optional audio fingerprint
 - acquisition method/error metadata and optional operator note
 
 ### Canonicalisation and evidence digest

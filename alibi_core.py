@@ -272,7 +272,7 @@ def scan_wifi(store: EvidenceStore) -> Tuple[List[str], Dict[str, Any]]:
         command = ["/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport", "-s"]
     elif system == "Linux":
         # --rescan no avoids explicitly requesting a radio scan through NetworkManager.
-        command = ["nmcli", "--terse", "--fields", "BSSID", "device", "wifi", "list", "--rescan", "no"]
+        command = ["nmcli", "--terse", "--escape", "no", "--fields", "BSSID", "device", "wifi", "list", "--rescan", "no"]
     else:
         return [], {"method": "unsupported-platform", "platform": system, "return_code": None}
     code, output, error = run_command(command, store.root)

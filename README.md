@@ -1,11 +1,16 @@
-# Digital Alibi
+<div align="center">
+  <img src="DigitalAlibi_Logo.svg" alt="Digital Alibi Logo" width="180" />
+  <h1>Digital Alibi</h1>
+  <strong>A Cryptographic Ambient Sensing Framework for Forensic Temporal and Spatial Verification</strong>
+</div>
+<br>
 
-**Digital Alibi** is a portable, plug-and-play forensic utility that proves a computer was in a specific physical room at a specific time. 
+**Digital Alibi** is a portable, plug-and-play forensic utility designed to conclusively prove that a computer was in a specific physical room at an exact time. 
 
-It does this by taking a snapshot of the invisible "radio room" around you (Wi-Fi routers, Bluetooth devices, Wired Networks, and Monitor Serial Numbers). It mathematically hashes that data and sends it to a recognized internet Time Authority (FreeTSA) to permanently lock the evidence.
+By taking a highly volatile snapshot of the invisible "radio room" around you—including **Wi-Fi routers, Bluetooth Low Energy (BLE) devices, Wired Networks, and Ambient Acoustic Entropy**—it constructs an undeniable spatial anchor. The framework then mathematically hashes this data, seals it with an offline Ed25519 signature, and transmits it to a recognized internet Time Authority (FreeTSA) to permanently lock the chain of custody.
 
-> **Author:** Developed by **Junaid Nizam Quadri**, M.Tech in Information Security and Cyber Forensics.  
-> **Version:** 1.0.0
+> 🎓 **Author:** Developed by **Junaid Nizam Quadri**, M.Tech in Information Security and Cyber Forensics.  
+> 🛡️ **Version:** 1.0.0 (Proprietary & Confidential)
 
 ---
 
